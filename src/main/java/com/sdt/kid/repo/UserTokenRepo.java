@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-
 @Repository
 public interface UserTokenRepo extends CrudRepository<UserToken, String> {
     Optional<UserToken> findByToken(String token);
