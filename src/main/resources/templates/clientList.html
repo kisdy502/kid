@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+</head>
+<body>
+<div>
+    <div>
+        <table border="2" width="66%" style="text-align:center;">
+            <thead>
+            <tr>
+                <th width="30%">用户名</th>
+                <th width="30%">在线状态</th>
+                <th width="40%">Ip Address</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="clientUser : ${clientUserList}">
+                <tr>
+                    <td>
+                        <block th:text="${clientUser.uId}"></block>
+                    </td>
+                    <td>
+                        <block th:text="${clientUser.onlined} ?'在线':'离线'"></block>
+                    </td>
+                    <td>
+                        <block th:text="${clientUser.nettyChannel}!=null ? ${clientUser.nettyChannel.address}:'未知'"></block>
+                    </td>
+                </tr>
+
+            </th:block>
+            </tbody>
+
+        </table>
+    </div>
+    <div>
+        <textarea style="width: 300px;margin-top: 60px;margin-bottom: 60px" rows="5" type="text" id="txt_push_content"
+                  name="txt_push_content"
+                  value="输入要推送给用户的内容"></textarea>
+        <br/>
+        <label for="msg_end_date">消息结束日期：</label><input id="msg_end_date" type="date"/>
+    </div>
+    <div>
+        <input type="button" style="width: 100px" name="send" value="推送" onclick="pushMessage()"/>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script type="text/javascript">
+    function pushMessage() {
+        var data = encodeURI($("#txt_push_content").val());
+        var endDate = $("#msg_end_date").val();
+
+        var newTime = Date.parse(new Date(endDate))
+        $.ajax({
+            url: "/user/push?message=" + data + "&endDate=" + newTime,
+            type: 'GET',
+            contentType: false,
+            processData: false,
+            success: function (result) {
+                console.log(result);
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+    }
+
+    $(document).ready(new function () {
+        var myDate = new Date();
+
+        var Y = myDate.getFullYear();
+        var M = myDate.getMonth() + 1;
+        var D = myDate.getDate();
+        //处理月是一位的情况
+        if ((M + '').length == 1) {
+            M = '0' + (M + '');
+        }
+        //处理日是一位的情况
+        if ((D + '').length == 1) {
+            D = '0' + (D + '')
+        }
+        var curDay = Y + '-' + M + '-' + D;
+        console.log("dom准备就绪事件!" + curDay);
+        $("#msg_end_date").val(curDay);
+    });
+
+
+</script>
+</body>
+</html>
