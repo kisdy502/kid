@@ -35,7 +35,7 @@ public class HandshakeHandler extends ChannelInboundHandlerAdapter {
 
         int msgType = handshakeRespMsg.getHeader().getMsgType();
         if (msgType == 1001) {
-            System.out.println("处理握手验证消息：" + handshakeRespMsg);
+            logger.debug("处理握手验证消息：" + handshakeRespMsg);
             String fromId = handshakeRespMsg.getHeader().getFromId();
             JSONObject jsonObj = JSON.parseObject(handshakeRespMsg.getHeader().getExtend());
             String token = jsonObj.getString("token");

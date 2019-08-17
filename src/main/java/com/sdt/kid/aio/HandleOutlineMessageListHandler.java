@@ -34,7 +34,7 @@ public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapte
 
         int msgType = message.getHeader().getMsgType();
         if (msgType == 1103) {
-            System.out.println("请求离线消息List：" + message);
+            logger.debug("请求离线消息List：" + message);
             if (message.getHeader().getFromId() != null) {
                 Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndMessageReportStatusEqualsAndEndTimeGreaterThan(
                         message.getHeader().getFromId(), 0, System.currentTimeMillis());
