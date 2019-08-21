@@ -11,6 +11,7 @@ import com.sdt.kid.service.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +77,22 @@ public class UserController {
                 return RestResp.success("login success", token);
             }
         }).orElse(RestResp.fail("登录失败，用户名或密码错误"));
+    }
+
+    @RequestMapping("/search")
+    @GetMapping
+    public RestResp search(HttpServletRequest request, String keyword) {
+        String token = request.getHeader("token");
+        if (StringUtils.isEmpty(token)) {
+            return RestResp.fail("no token");
+        }
+        return userRepo.findByName(keyword).map(new Function<User, RestResp>() {
+            @Override
+            public RestResp apply(User user) {
+                user.setPassword("");
+                return RestResp.success("搜索成功", user);
+            }
+        }).orElse(RestResp.fail("未搜索到匹配的用户"));
     }
 
 

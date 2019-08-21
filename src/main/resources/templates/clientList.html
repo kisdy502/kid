@@ -11,14 +11,18 @@
         <table border="2" width="66%" style="text-align:center;">
             <thead>
             <tr>
+                <th width="20%">chennelId</th>
                 <th width="30%">用户名</th>
-                <th width="30%">在线状态</th>
-                <th width="40%">Ip Address</th>
+                <th width="20%">在线状态</th>
+                <th width="30%">Ip Address</th>
             </tr>
             </thead>
             <tbody>
             <th:block th:each="clientUser : ${clientUserList}">
                 <tr>
+                    <td>
+                        <block th:text="${clientUser.nettyChannel}!=null ? ${clientUser.nettyChannel.getChannelId()}:'无'"></block>
+                    </td>
                     <td>
                         <block th:text="${clientUser.uId}"></block>
                     </td>

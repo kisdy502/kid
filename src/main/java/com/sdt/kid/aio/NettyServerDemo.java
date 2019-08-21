@@ -14,8 +14,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-
 /**
  * <p>@ProjectName:     BoChat</p>
  * <p>@ClassName:       NettyServerDemo.java</p>
@@ -59,7 +57,7 @@ public class NettyServerDemo {
                     pipeline.addLast(new ProtobufEncoder());
                     //处理类
                     pipeline.addLast(new ServerHandler());
-                    pipeline.addLast(new HandshakeHandler());
+                    pipeline.addLast(new HandhakeHandler());
                     pipeline.addLast(new HeatResponseHandler());
                     pipeline.addLast(new ClientReportMessageHandler());
                     pipeline.addLast(new HandleFriendListHandler());
@@ -90,15 +88,22 @@ public class NettyServerDemo {
             });
 
 
-            //等待服务端监听端口关闭
-            future.channel().closeFuture().sync();
+            //等待服务端监听端口关闭,阻塞当前线程
+            future.channel().closeFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
+                @Override
+                public void operationComplete(Future<? super Void> future) throws Exception {
+                    System.out.println("server stop...... ");
+                    //优雅退出，释放线程池资源
+                    boss.shutdownGracefully();
+                    worker.shutdownGracefully();
+
+                }
+            });
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            //优雅退出，释放线程池资源
-            boss.shutdownGracefully();
-            worker.shutdownGracefully();
+
         }
     }
 }

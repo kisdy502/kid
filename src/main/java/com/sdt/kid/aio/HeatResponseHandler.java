@@ -9,7 +9,6 @@ public class HeatResponseHandler extends ChannelInboundHandlerAdapter {
     public HeatResponseHandler() {
     }
 
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage heatMsg = (TransMessageProtobuf.TransMessage) msg;

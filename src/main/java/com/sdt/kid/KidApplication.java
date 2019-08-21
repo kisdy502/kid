@@ -23,12 +23,12 @@ public class KidApplication implements CommandLineRunner {
         application.addListeners(new MyApplicationStartingEvent());
         ApplicationContext context = application.run(args);
 
-        String[] beanNames = context.getBeanDefinitionNames();
-        logger.info("bean总数:{}", context.getBeanDefinitionCount());
-        int i = 0;
-        for (String str : beanNames) {
-            logger.info("{},beanName:{}", ++i, str);
-        }
+//        String[] beanNames = context.getBeanDefinitionNames();
+//        logger.info("bean总数:{}", context.getBeanDefinitionCount());
+//        int i = 0;
+//        for (String str : beanNames) {
+//            logger.info("{},beanName:{}", ++i, str);
+//        }
 
 
     }

@@ -5,7 +5,6 @@ import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
 import com.sdt.kid.bean.AppMessage;
 import com.sdt.kid.repo.AppMessageRepo;
-import com.sdt.kid.repo.UserRelationRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
