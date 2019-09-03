@@ -21,7 +21,7 @@ public interface AppMessageRepo extends CrudRepository<AppMessage, Long> {
 
     Optional<AppMessage> findByMessageId(String messageId);
 
-    Optional<List<AppMessage>> findByToIdEqualsAndMessageReportStatusEqualsAndEndTimeGreaterThan(String fromId, int reportStatus, long endTime);
+    Optional<List<AppMessage>> findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(String fromId, int reportStatus, long endTime);
 
     @Modifying
     @Transactional

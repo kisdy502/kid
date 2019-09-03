@@ -6,6 +6,8 @@ import com.sdt.kid.bean.AppMessage;
 import com.sdt.kid.repo.AppMessageRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -24,6 +26,8 @@ import java.util.function.Consumer;
  */
 public class ClientReportMessageHandler extends ChannelInboundHandlerAdapter {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
     private AppMessageRepo appMessageRepo;
 
     public ClientReportMessageHandler() {
@@ -38,14 +42,14 @@ public class ClientReportMessageHandler extends ChannelInboundHandlerAdapter {
         }
 
         int msgType = message.getHeader().getMsgType();
-        if (msgType == 1009) {
+        if (msgType == MessageType.CLIENT_MSG_RECEIVED_STATUS_REPORT.getMsgType()) {
             Optional<AppMessage> appMessageOptional = appMessageRepo.findByMessageId(message.getHeader().getMsgId());
             appMessageOptional.ifPresent(new Consumer<AppMessage>() {
                 @Override
                 public void accept(AppMessage appMessage) {
-                    appMessage.setMessageReportStatus(1);
+                    appMessage.setStatusReport(1);
                     appMessageRepo.save(appMessage);
-                    System.out.println(",消息已经成功发送至客户端:" + appMessage.getMessageId());
+                    logger.debug("消息已经成功发送至客户端:" + appMessage.getMessageId());
                 }
             });
         } else {

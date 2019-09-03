@@ -1,10 +1,12 @@
 package com.sdt.kid.bean;
 
+import com.alibaba.fastjson.JSON;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
 @Entity
-@Table(name = "AppMessage") // 唯一约束name
+@Table(name = "AppMessage", uniqueConstraints = @UniqueConstraint(columnNames = {"messageId"}))
 public class AppMessage {
 
     @Id
@@ -19,10 +21,11 @@ public class AppMessage {
     @NotBlank
     private String messageId;
     private int messageType;
-    private int messageContentType;    //文本 ，语音 ，图片，视频  0，1，2，3
-    private int messageReportStatus;   //0 默认状态，已发送，未收到消息回执,1已发送给接收人，收到消息回执
-    @NotBlank
-    private String content;            //消息内容
+    private int messageContentType;     //文本 ，语音 ，图片，视频  0，1，2，3
+    private int statusReport;           //0 默认状态，已发送，未收到消息回执,1已发送给接收人，收到消息回执
+    private String extend;              //头扩展内容
+    @Column(length = 65536)
+    private String content;             //消息内容
 
     public Long getId() {
         return id;
@@ -88,12 +91,20 @@ public class AppMessage {
         this.messageContentType = messageContentType;
     }
 
-    public int getMessageReportStatus() {
-        return messageReportStatus;
+    public int getStatusReport() {
+        return statusReport;
     }
 
-    public void setMessageReportStatus(int messageReportStatus) {
-        this.messageReportStatus = messageReportStatus;
+    public void setStatusReport(int statusReport) {
+        this.statusReport = statusReport;
+    }
+
+    public String getExtend() {
+        return extend;
+    }
+
+    public void setExtend(String extend) {
+        this.extend = extend;
     }
 
     public String getContent() {
@@ -102,5 +113,10 @@ public class AppMessage {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
     }
 }

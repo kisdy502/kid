@@ -2,6 +2,7 @@ package com.sdt.kid.controller;
 
 
 import com.sdt.im.protobuf.TransMessageProtobuf;
+import com.sdt.kid.aio.MessageType;
 import com.sdt.kid.aio.ServerHandler;
 import com.sdt.kid.bean.*;
 import com.sdt.kid.repo.AppMessageRepo;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 
 @RestController
 @RequestMapping("/user")
@@ -128,8 +128,8 @@ public class UserController {
             appMessage.setToId(clientUser.getuId());
             appMessage.setMessageId(headerBuilder.getMsgId());
             appMessage.setEndTime(endDate);
-            appMessage.setMessageType(1000);
-            appMessage.setMessageReportStatus(0);
+            appMessage.setMessageType(MessageType.SYSTEMMESSAGE.getMsgType());
+            appMessage.setStatusReport(0);
             appMessage.setMessageContentType(0);
             appMessage.setContent(decodeMessage);
             appMessageRepo.save(appMessage);

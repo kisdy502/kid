@@ -31,7 +31,7 @@ public class HandleOutlineMessageSendedHandler extends ChannelInboundHandlerAdap
         }
 
         int msgType = message.getHeader().getMsgType();
-        if (msgType == 1105) {
+        if (msgType == MessageType.REPORT_RECEIVED_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("离线消息已被客户端接收：" + message);
             if (message.getBody() != null) {
                 message.getBody();
@@ -43,7 +43,7 @@ public class HandleOutlineMessageSendedHandler extends ChannelInboundHandlerAdap
                     optional.ifPresent(new Consumer<AppMessage>() {
                         @Override
                         public void accept(AppMessage appMessage) {
-                            appMessage.setMessageReportStatus(1);
+                            appMessage.setStatusReport(1);
                             appMessageRepo.save(appMessage);
                         }
                     });

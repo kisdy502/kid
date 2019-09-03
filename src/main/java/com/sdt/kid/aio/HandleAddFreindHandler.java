@@ -1,28 +1,21 @@
 package com.sdt.kid.aio;
 
-import com.alibaba.fastjson.JSON;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
-import com.sdt.kid.bean.UserRelation;
-import com.sdt.kid.repo.UserRelationRepo;
+import com.sdt.kid.bean.AppMessage;
+import com.sdt.kid.repo.AppMessageRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private UserRelationRepo userRelationRepo;
+    private AppMessageRepo appMessageRepo;
 
     public HandleAddFreindHandler() {
-        userRelationRepo = ApplicationContextProvider.getApplicationContext().getBean(UserRelationRepo.class, "userRelationRepo");
-        logger.info("userRelationRepo is null:" + (userRelationRepo == null));
+        appMessageRepo = ApplicationContextProvider.getApplicationContext().getBean(AppMessageRepo.class, "appMessageRepo");
     }
 
     @Override
@@ -33,21 +26,21 @@ public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
         }
 
         int msgType = message.getHeader().getMsgType();
-        if (msgType == 1011) {
-            System.out.println("请求添加你为好友：" + message);
-            if (!StringUtils.isEmpty(message.getHeader().getToId())) {
-                String toId = message.getHeader().getToId();
-                ServerHandler.NettyChannel toNettyChannel = ServerHandler.ChannelContainer.getInstance().getActiveChannelByUserId(toId);
-                if (toNettyChannel != null) {
-                    toNettyChannel.getChannel().writeAndFlush(message);
-                } else {
-                    System.out.println("不在线,接收者..." + toId);
-                    //TODO save 2 db
-                }
-            }
+        if (msgType == MessageType.MESSAGE_REQUEST_ADD_FRIEND.getMsgType()) {
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
+            String fromId = message.getHeader().getFromId();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
+
+            AppMessage appMessage = MessageHelper.ProtobufMsgToAppMessage(message);
+            appMessageRepo.save(appMessage);
+
+            logger.info("{}请求添加{}为好友：", message.getHeader().getFromId(), message.getHeader().getToId());
+            MessageHelper.forwardMessage(message.getHeader().getToId(), message);
         } else {
             ctx.fireChannelRead(msg);
         }
     }
+
 
 }

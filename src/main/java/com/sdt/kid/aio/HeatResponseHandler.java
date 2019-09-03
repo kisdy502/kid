@@ -3,8 +3,12 @@ package com.sdt.kid.aio;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HeatResponseHandler extends ChannelInboundHandlerAdapter {
+
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     public HeatResponseHandler() {
     }
@@ -16,11 +20,10 @@ public class HeatResponseHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         int msgType = heatMsg.getHeader().getMsgType();
-        if (msgType == 1002) {
-            System.out.println("客户端心跳消息：" + heatMsg);
+        if (msgType == MessageType.HEARTBEAT.getMsgType()) {
+            logger.debug("客户端心跳消息：" + heatMsg);
             String fromId = heatMsg.getHeader().getFromId();
-
-            ServerHandler.ChannelContainer.getInstance().getActiveChannelByUserId(fromId).getChannel().writeAndFlush(heatMsg);
+            MessageHelper.forwardMessage(fromId, heatMsg);
         } else {
             ctx.fireChannelRead(msg);
         }

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class HandhakeHandler extends ChannelInboundHandlerAdapter {
     private Logger logger = LoggerFactory.getLogger(getClass());
@@ -37,7 +36,7 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
         }
 
         int msgType = handshakeRespMsg.getHeader().getMsgType();
-        if (msgType == 1001) {
+        if (msgType == MessageType.HANDSHAKE.getMsgType()) {
             logger.debug("处理握手验证消息：" + handshakeRespMsg);
             String fromId = handshakeRespMsg.getHeader().getFromId();
             JSONObject jsonObj = JSON.parseObject(handshakeRespMsg.getHeader().getExtend());
@@ -51,7 +50,10 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
                 //原来已经登录的被踢下线
                 ServerHandler.NettyChannel prevChannel = ServerHandler.ChannelContainer.getInstance().getActiveChannelByUserId(fromId);
                 if (prevChannel != null) {
-                    sendForceLogoutMessage(prevChannel);
+                    TransMessageProtobuf.TransMessage transMessage = MessageHelper.getForceLogoutMessage();
+                    ChannelFuture future = prevChannel.getChannel().writeAndFlush(transMessage);
+                    future.addListener(ChannelFutureListener.CLOSE);
+                    ServerHandler.ChannelContainer.getInstance().removeChannelIfConnectNoActive(prevChannel.getChannel());
                 }
 
                 resp.put("status", 1);
@@ -71,8 +73,6 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
     }
 
     private boolean validUserToken(String userName, String token) {
-        logger.info("userService:" + (userService == null));
-        logger.info("jwtService:" + (jwtService == null));
         Optional<User> userOptional = userService.getUserRepo().findByName(userName);
         if (userOptional.isPresent()) {
             Optional<JwtAuthentication> authentication = jwtService.parse(token);
@@ -89,17 +89,5 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
         return false;
     }
 
-    private void sendForceLogoutMessage(ServerHandler.NettyChannel prevChannel) {
-        TransMessageProtobuf.TransMessage.Builder messageBuilder = TransMessageProtobuf.TransMessage.newBuilder();
-        TransMessageProtobuf.MessageHeader.Builder headerBuilder = TransMessageProtobuf.MessageHeader.newBuilder();
-        headerBuilder.setMsgId(UUID.randomUUID().toString());
-        headerBuilder.setMsgType(1003);
-        headerBuilder.setTimestamp(System.currentTimeMillis());
-        messageBuilder.setHeader(headerBuilder.build());
-        messageBuilder.setBody("账号在其它地方登录,你已被强制下线");
-        ChannelFuture future = prevChannel.getChannel().writeAndFlush(messageBuilder.build());
-        future.addListener(ChannelFutureListener.CLOSE);
-        ServerHandler.ChannelContainer.getInstance().removeChannelIfConnectNoActive(prevChannel.getChannel());
-    }
 
 }

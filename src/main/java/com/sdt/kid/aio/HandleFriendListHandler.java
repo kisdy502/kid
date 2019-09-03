@@ -1,6 +1,5 @@
 package com.sdt.kid.aio;
 
-import com.alibaba.fastjson.JSON;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
 import com.sdt.kid.bean.UserRelation;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class HandleFriendListHandler extends ChannelInboundHandlerAdapter {
 
@@ -32,14 +30,14 @@ public class HandleFriendListHandler extends ChannelInboundHandlerAdapter {
         }
 
         int msgType = message.getHeader().getMsgType();
-        if (msgType == 1101) {
-            System.out.println("请求好友列表：" + message);
+        if (msgType == MessageType.GET_USER_FRIEND_LIST.getMsgType()) {
+            logger.debug("请求好友列表：" + message);
             if (message.getHeader().getFromId() != null) {
                 if (userRelationRepo.findByMyName(message.getHeader().getFromId()).isPresent()) {
                     List<UserRelation> userRelations = userRelationRepo.findByMyName(message.getHeader().getFromId()).get();
-                    sendList(userRelations, ctx);
+                    ctx.channel().writeAndFlush(MessageHelper.getRealtionListMessage(userRelations));
                 } else {
-                    sendList(new ArrayList<UserRelation>(), ctx);
+                    ctx.channel().writeAndFlush(MessageHelper.getRealtionListMessage(new ArrayList<UserRelation>()));
                 }
             }
         } else {
@@ -47,15 +45,5 @@ public class HandleFriendListHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void sendList(List<UserRelation> userRelations, ChannelHandlerContext ctx) {
-        TransMessageProtobuf.TransMessage.Builder sentReportMsgBuilder = TransMessageProtobuf.TransMessage.newBuilder();
-        TransMessageProtobuf.MessageHeader.Builder sentReportHeadBuilder = TransMessageProtobuf.MessageHeader.newBuilder();
-        sentReportHeadBuilder.setMsgId(UUID.randomUUID().toString());
-        sentReportHeadBuilder.setMsgType(1101);
-        sentReportHeadBuilder.setTimestamp(System.currentTimeMillis());
-        sentReportMsgBuilder.setHeader(sentReportHeadBuilder.build());
-        sentReportMsgBuilder.setBody(JSON.toJSONString(userRelations));
-        ctx.writeAndFlush(sentReportMsgBuilder);
-    }
 
 }

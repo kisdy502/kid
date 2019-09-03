@@ -64,6 +64,7 @@ public class NettyServerDemo {
                     pipeline.addLast(new HandleOutlineMessageListHandler());
                     pipeline.addLast(new HandleOutlineMessageSendedHandler());
                     pipeline.addLast(new HandleAddFreindHandler());
+                    pipeline.addLast(new HandleResendMessageListHandler());
                     pipeline.addLast(new ChatHandler());
                 }
             });

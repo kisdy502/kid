@@ -1,6 +1,5 @@
 package com.sdt.kid.aio;
 
-import com.alibaba.fastjson.JSON;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
 import com.sdt.kid.bean.AppMessage;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapter {
@@ -32,15 +30,15 @@ public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapte
         }
 
         int msgType = message.getHeader().getMsgType();
-        if (msgType == 1103) {
+        if (msgType == MessageType.GET_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("请求离线消息List：" + message);
             if (message.getHeader().getFromId() != null) {
-                Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndMessageReportStatusEqualsAndEndTimeGreaterThan(
+                Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(
                         message.getHeader().getFromId(), 0, System.currentTimeMillis());
                 optional.ifPresent(new Consumer<List<AppMessage>>() {
                     @Override
                     public void accept(List<AppMessage> appMessageList) {
-                        sendOutLineList(appMessageList, ctx);
+                        ctx.channel().writeAndFlush(MessageHelper.getOutLineList(appMessageList));
                     }
                 });
             }
@@ -48,16 +46,4 @@ public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapte
             ctx.fireChannelRead(msg);
         }
     }
-
-    private void sendOutLineList(List<AppMessage> appMessageList, ChannelHandlerContext ctx) {
-        TransMessageProtobuf.TransMessage.Builder messageBuilder = TransMessageProtobuf.TransMessage.newBuilder();
-        TransMessageProtobuf.MessageHeader.Builder headerBuilder = TransMessageProtobuf.MessageHeader.newBuilder();
-        headerBuilder.setMsgId(UUID.randomUUID().toString());
-        headerBuilder.setMsgType(1103);
-        headerBuilder.setTimestamp(System.currentTimeMillis());
-        messageBuilder.setHeader(headerBuilder.build());
-        messageBuilder.setBody(JSON.toJSONString(appMessageList));
-        ctx.writeAndFlush(messageBuilder.build());
-    }
-
 }

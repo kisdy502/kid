@@ -1,8 +1,5 @@
 package com.sdt.kid.auth;
 
-import com.sdt.kid.auth.AuthError;
-import com.sdt.kid.auth.JwtAuthenticationProvider;
-import com.sdt.kid.auth.JwtTokenFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;

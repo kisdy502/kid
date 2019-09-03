@@ -70,13 +70,13 @@ public class JwtService {
                 .signWith(SignatureAlgorithm.RS256, privateKey).compact();
     }
 
-    public  Optional<JwtAuthentication> parse(String token) {
+    public Optional<JwtAuthentication> parse(String token) {
         try {
             Jws<Claims> jws = new DefaultJwtParser().setSigningKey(publicKey).parseClaimsJws(token);
             Claims claims = jws.getBody();
             return userRepo.findByName(claims.getSubject()).map(u -> new JwtAuthentication(u, token, claims));
         } catch (Exception e) {
-            logger.error("failed to parse jwt token {}", token, e);
+            logger.error("failed to parse jwt token {},{}", token, e.toString());
         }
         return empty();
     }
