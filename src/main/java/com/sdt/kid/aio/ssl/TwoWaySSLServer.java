@@ -16,6 +16,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 
 import javax.net.ssl.*;
 import java.io.FileNotFoundException;
@@ -25,6 +26,7 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 
+@Service
 public class TwoWaySSLServer {
 
     private Logger logger = LoggerFactory.getLogger(getClass());

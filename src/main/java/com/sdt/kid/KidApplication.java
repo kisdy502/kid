@@ -49,7 +49,7 @@ public class KidApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        //demo.startServer(args);
+        demo.startServer(args);
         oneWaySSLServer.start();
         oneWaySSLClient.start();
         twoWaySSLServer.start();
