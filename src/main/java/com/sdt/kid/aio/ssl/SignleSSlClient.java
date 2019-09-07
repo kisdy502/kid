@@ -113,6 +113,7 @@ public class SignleSSlClient {
                     60000 * 3, 60000, 60000 * 4, TimeUnit.MILLISECONDS));
 
             pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
+            pipeline.addLast(NettySocketSSLHandler.class.getSimpleName(), new NettySocketSSLHandler());
         }
     }
 

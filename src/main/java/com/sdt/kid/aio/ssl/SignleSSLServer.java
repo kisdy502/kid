@@ -75,7 +75,7 @@ public class SignleSSLServer {
                     pipeline.addLast(new ProtobufEncoder());
 
                     pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
-
+                    pipeline.addLast(NettySocketSSLHandler.class.getSimpleName(), new NettySocketSSLHandler());
                 }
             });
 
