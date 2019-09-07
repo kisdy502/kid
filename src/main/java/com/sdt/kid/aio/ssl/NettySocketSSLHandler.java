@@ -37,15 +37,12 @@ public class NettySocketSSLHandler extends ChannelInboundHandlerAdapter {
                             logger.info("握手失败");
                         }
 
-                        String content = "Welcome to " + InetAddress.getLocalHost().getHostName() +
-                                " secure chat service!\n";
+                        String content = "Welcome to " + InetAddress.getLocalHost().getHostName() + " secure chat service!\n";
                         TransMessageProtobuf.TransMessage transMessage = buildMessage(content);
 
                         String content1 = "Your session is protected by " +
-                                ctx.pipeline().get(SslHandler.class).engine().getSession().getCipherSuite() +
-                                " cipher suite.\n";
+                                ctx.pipeline().get(SslHandler.class).engine().getSession().getCipherSuite() + " cipher suite.\n";
                         TransMessageProtobuf.TransMessage transMessage2 = buildMessage(content1);
-
                         ctx.channel().writeAndFlush(transMessage);
                         ctx.channel().writeAndFlush(transMessage2);
 
