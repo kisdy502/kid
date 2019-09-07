@@ -15,13 +15,13 @@ import java.util.Optional;
 @Repository
 public interface AppMessageRepo extends CrudRepository<AppMessage, Long> {
 
-    Optional<List<AppMessage>> findByFromId(String fromId);
+    Optional<List<AppMessage>> findByFromId(Long fromId);
 
-    Optional<List<AppMessage>> findByToId(String toId);
+    Optional<List<AppMessage>> findByToId(Long toId);
 
     Optional<AppMessage> findByMessageId(String messageId);
 
-    Optional<List<AppMessage>> findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(String fromId, int reportStatus, long endTime);
+    Optional<List<AppMessage>> findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(Long fromId, int reportStatus, long endTime);
 
     @Modifying
     @Transactional

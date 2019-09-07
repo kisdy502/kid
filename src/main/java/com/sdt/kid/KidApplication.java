@@ -1,6 +1,7 @@
 package com.sdt.kid;
 
 import com.sdt.kid.aio.NettyServerDemo;
+import com.sdt.kid.aio.ssl.SignleSSLServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -15,6 +16,8 @@ public class KidApplication implements CommandLineRunner {
 
     @Resource
     NettyServerDemo demo;
+    @Resource
+    SignleSSLServer signleSSLServer;
 
     private static Logger logger = LoggerFactory.getLogger(KidApplication.class);
 
@@ -22,7 +25,6 @@ public class KidApplication implements CommandLineRunner {
         SpringApplication application = new SpringApplication(KidApplication.class);
         application.addListeners(new MyApplicationStartingEvent());
         ApplicationContext context = application.run(args);
-
 //        String[] beanNames = context.getBeanDefinitionNames();
 //        logger.info("bean总数:{}", context.getBeanDefinitionCount());
 //        int i = 0;
@@ -35,6 +37,7 @@ public class KidApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        demo.startServer(args);
+        //demo.startServer(args);
+        signleSSLServer.start();
     }
 }

@@ -8,13 +8,10 @@ import com.sdt.kid.bean.AppMessage;
 import com.sdt.kid.repo.AppMessageRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import net.bytebuddy.description.method.MethodDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
 import org.springframework.util.StringUtils;
 
-import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,13 +27,11 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
-        if (message == null || message.getHeader() == null) {
-            return;
-        }
 
-        int msgType = message.getHeader().getMsgType();
+
+        int msgType = message.getMsgType();
         if (msgType == MessageType.RESEND_FAILED_MESSAGE_LIST.getMsgType()) {
-            String messageListString = message.getBody();
+            String messageListString = message.getContent();
             logger.info("重发消息列表:" + messageListString);
             if (StringUtils.isEmpty(messageListString)) {
                 return;
@@ -53,8 +48,8 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
                 TransMessageProtobuf.TransMessage transMessage = MessageHelper.getProtoBufMessageBuilderByAppMessage(appMessage);
 
                 TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
-                String fromId = message.getHeader().getFromId();
-                MessageHelper.forwardMessage(fromId,reportStatusMessage);
+                Long fromId = message.getFromId();
+                MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
                 Optional<AppMessage> optional = appMessageRepo.findByMessageId(appMessage.getMessageId());
                 if (optional.isPresent()) {
@@ -65,7 +60,7 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
                 appMessage.setEndTime(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7);
                 appMessageRepo.save(appMessage);
 
-                String toId = transMessage.getHeader().getToId();
+                Long toId = transMessage.getToId();
                 ServerHandler.NettyChannel toNettyChannel = ServerHandler.ChannelContainer.getInstance().getActiveChannelByUserId(toId);
                 if (toNettyChannel != null) {
                     toNettyChannel.getChannel().writeAndFlush(transMessage);

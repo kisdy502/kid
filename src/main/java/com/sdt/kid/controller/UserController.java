@@ -57,7 +57,7 @@ public class UserController {
             public RestResp get() {
                 User u = userRepo.save(user);
                 logger.info("{} registered", u);
-                return RestResp.success("register success");
+                return RestResp.success(u);
             }
         });
     }
@@ -74,7 +74,8 @@ public class UserController {
                 } else {
                     userTokenRepo.save(new UserToken(token, new Date()));
                 }
-                return RestResp.success("login success", token);
+                user.setToken(token);
+                return RestResp.success("login success", user);
             }
         }).orElse(RestResp.fail("登录失败，用户名或密码错误"));
     }
@@ -100,33 +101,32 @@ public class UserController {
     public RestResp push(String message, long endDate) throws UnsupportedEncodingException {
         logger.info("push message {}", message);
         TransMessageProtobuf.TransMessage.Builder msgBuilder = TransMessageProtobuf.TransMessage.newBuilder();
-        TransMessageProtobuf.MessageHeader.Builder headerBuilder = TransMessageProtobuf.MessageHeader.newBuilder();
 
         Iterator<User> userIterator = userRepo.findAll().iterator();
         String decodeMessage = URLDecoder.decode(message, "UTF-8");
         logger.info("decodeMessage {}", decodeMessage);
         while (userIterator.hasNext()) {
             ClientUser clientUser = new ClientUser();
-            clientUser.setuId(userIterator.next().getName());
+            clientUser.setId(userIterator.next().getId());
+            clientUser.setUserName(userIterator.next().getName());
             ServerHandler.NettyChannel nettyChannel = ServerHandler.ChannelContainer.getInstance()
-                    .getActiveChannelByUserId(clientUser.getuId());
+                    .getActiveChannelByUserId(clientUser.getId());
             clientUser.setOnlined(nettyChannel != null);
             clientUser.setNettyChannel(nettyChannel);
 
-            headerBuilder.setMsgId(UUID.randomUUID().toString());
-            headerBuilder.setFromId("PushServer");
-            headerBuilder.setToId(clientUser.getuId());
-            headerBuilder.setMsgType(1000);
-            headerBuilder.setTimestamp(System.currentTimeMillis());
-            headerBuilder.setStatusReport(0);
-            msgBuilder.setHeader(headerBuilder.build());
-            msgBuilder.setBody(decodeMessage);
+            msgBuilder.setMsgId(UUID.randomUUID().toString());
+            msgBuilder.setFromId(0);
+            msgBuilder.setToId(clientUser.getId());
+            msgBuilder.setMsgType(1000);
+            msgBuilder.setSendTime(System.currentTimeMillis());
+            msgBuilder.setStatusReport(0);
+            msgBuilder.setContent(decodeMessage);
 
             AppMessage appMessage = new AppMessage();
-            appMessage.setFromId("PushServer");
-            appMessage.setSendTime(headerBuilder.getTimestamp());
-            appMessage.setToId(clientUser.getuId());
-            appMessage.setMessageId(headerBuilder.getMsgId());
+            appMessage.setFromId(0L);
+            appMessage.setSendTime(msgBuilder.getSendTime());
+            appMessage.setToId(clientUser.getId());
+            appMessage.setMessageId(msgBuilder.getMsgId());
             appMessage.setEndTime(endDate);
             appMessage.setMessageType(MessageType.SYSTEMMESSAGE.getMsgType());
             appMessage.setStatusReport(0);

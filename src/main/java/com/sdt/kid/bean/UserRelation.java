@@ -10,16 +10,16 @@ public class UserRelation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String myName;
+    private Long myId;
 
-    private String friendName;
+    private Long friendId;
 
     public UserRelation() {
     }
 
-    public UserRelation(String myName, String friendName) {
-        this.myName = myName;
-        this.friendName = friendName;
+    public UserRelation(Long myId, Long friendId) {
+        this.myId = myId;
+        this.friendId = friendId;
     }
 
     public Long getId() {
@@ -30,19 +30,11 @@ public class UserRelation {
         this.id = id;
     }
 
-    public String getMyName() {
-        return myName;
+    public Long getMyId() {
+        return myId;
     }
 
-    public void setMyName(String myName) {
-        this.myName = myName;
-    }
-
-    public String getFriendName() {
-        return friendName;
-    }
-
-    public void setFriendName(String friendName) {
-        this.friendName = friendName;
+    public Long getFriendId() {
+        return friendId;
     }
 }

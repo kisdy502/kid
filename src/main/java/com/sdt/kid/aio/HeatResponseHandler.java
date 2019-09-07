@@ -16,13 +16,13 @@ public class HeatResponseHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage heatMsg = (TransMessageProtobuf.TransMessage) msg;
-        if (heatMsg == null || heatMsg.getHeader() == null) {
+        if (heatMsg == null) {
             return;
         }
-        int msgType = heatMsg.getHeader().getMsgType();
+        int msgType = heatMsg.getMsgType();
         if (msgType == MessageType.HEARTBEAT.getMsgType()) {
             logger.debug("客户端心跳消息：" + heatMsg);
-            String fromId = heatMsg.getHeader().getFromId();
+            Long fromId = heatMsg.getFromId();
             MessageHelper.forwardMessage(fromId, heatMsg);
         } else {
             ctx.fireChannelRead(msg);

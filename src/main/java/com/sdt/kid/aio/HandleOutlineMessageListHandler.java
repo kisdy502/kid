@@ -25,23 +25,18 @@ public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapte
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
-        if (message == null || message.getHeader() == null) {
-            return;
-        }
 
-        int msgType = message.getHeader().getMsgType();
+        int msgType = message.getMsgType();
         if (msgType == MessageType.GET_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("请求离线消息List：" + message);
-            if (message.getHeader().getFromId() != null) {
-                Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(
-                        message.getHeader().getFromId(), 0, System.currentTimeMillis());
-                optional.ifPresent(new Consumer<List<AppMessage>>() {
-                    @Override
-                    public void accept(List<AppMessage> appMessageList) {
-                        ctx.channel().writeAndFlush(MessageHelper.getOutLineList(appMessageList));
-                    }
-                });
-            }
+            Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(
+                    message.getFromId(), 0, System.currentTimeMillis());
+            optional.ifPresent(new Consumer<List<AppMessage>>() {
+                @Override
+                public void accept(List<AppMessage> appMessageList) {
+                    ctx.channel().writeAndFlush(MessageHelper.getOutLineList(appMessageList));
+                }
+            });
         } else {
             ctx.fireChannelRead(msg);
         }

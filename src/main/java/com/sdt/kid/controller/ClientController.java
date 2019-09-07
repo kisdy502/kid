@@ -31,14 +31,13 @@ public class ClientController {
 
         List<ClientUser> clientUserList = new ArrayList<>();
 
-        Map<String, ServerHandler.NettyChannel> maps = ServerHandler.ChannelContainer.getInstance().getChannels();
-
         Iterator<User> userIterator = userRepo.findAll().iterator();
         while (userIterator.hasNext()) {
             ClientUser clientUser = new ClientUser();
-            clientUser.setuId(userIterator.next().getName());
+            clientUser.setId(userIterator.next().getId());
+            clientUser.setUserName(userIterator.next().getName());
             ServerHandler.NettyChannel nettyChannel = ServerHandler.ChannelContainer.getInstance()
-                    .getActiveChannelByUserId(clientUser.getuId());
+                    .getActiveChannelByUserId(clientUser.getId());
             clientUser.setOnlined(nettyChannel != null);
             clientUser.setNettyChannel(nettyChannel);
             clientUserList.add(clientUser);

@@ -1,7 +1,8 @@
 package com.sdt.kid.bean;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户群组
@@ -12,10 +13,10 @@ public class UserGroup {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private String groupId;
-    @NotBlank
-    private String creatorName;
-    @NotBlank
+    private Long id;
+
+    private Long creatorId;
+
     private String groupName;
 
     private long createTime;
@@ -24,20 +25,23 @@ public class UserGroup {
 
     private String groupTag;
 
-    public String getGroupId() {
-        return groupId;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<GroupMember> groupMemberList = new ArrayList<GroupMember>();
+
+    public Long getId() {
+        return id;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getCreatorName() {
-        return creatorName;
+    public Long getCreatorId() {
+        return creatorId;
     }
 
-    public void setCreatorName(String creatorName) {
-        this.creatorName = creatorName;
+    public void setCreatorId(Long createUserId) {
+        this.creatorId = createUserId;
     }
 
     public String getGroupName() {
@@ -70,5 +74,22 @@ public class UserGroup {
 
     public void setGroupTag(String groupTag) {
         this.groupTag = groupTag;
+    }
+
+    public List<GroupMember> getGroupMemberList() {
+        return groupMemberList;
+    }
+
+    public void addGroupMember(GroupMember groupMember) {
+        groupMemberList.add(groupMember);
+        groupMember.setUserGroup(this);
+    }
+
+    public void removeGroupMember(GroupMember groupMember) {
+        groupMemberList.remove(groupMember);
+        groupMember.setUserGroup(null);
+    }
+
+    public UserGroup() {
     }
 }

@@ -6,8 +6,8 @@ import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
 import com.sdt.kid.auth.JwtAuthentication;
 import com.sdt.kid.bean.User;
+import com.sdt.kid.repo.UserRepo;
 import com.sdt.kid.service.JwtService;
-import com.sdt.kid.service.UserService;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,25 +21,25 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private JwtService jwtService;
-    private UserService userService;
+    private UserRepo userRepo;
 
     public HandhakeHandler() {
         jwtService = ApplicationContextProvider.getApplicationContext().getBean(JwtService.class, "jwtService");
-        userService = ApplicationContextProvider.getApplicationContext().getBean(UserService.class, "userService");
+        userRepo = ApplicationContextProvider.getApplicationContext().getBean(UserRepo.class, "userRepo");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage handshakeRespMsg = (TransMessageProtobuf.TransMessage) msg;
-        if (handshakeRespMsg == null || handshakeRespMsg.getHeader() == null) {
+        if (handshakeRespMsg == null) {
             return;
         }
 
-        int msgType = handshakeRespMsg.getHeader().getMsgType();
+        int msgType = handshakeRespMsg.getMsgType();
         if (msgType == MessageType.HANDSHAKE.getMsgType()) {
             logger.debug("处理握手验证消息：" + handshakeRespMsg);
-            String fromId = handshakeRespMsg.getHeader().getFromId();
-            JSONObject jsonObj = JSON.parseObject(handshakeRespMsg.getHeader().getExtend());
+            Long fromId = handshakeRespMsg.getFromId();
+            JSONObject jsonObj = JSON.parseObject(handshakeRespMsg.getExtend());
             String token = jsonObj.getString("token");
             logger.info("fromId:" + fromId);
             logger.info("token:" + token);
@@ -58,12 +58,12 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
 
                 resp.put("status", 1);
                 ServerHandler.ChannelContainer.getInstance().saveChannel(new ServerHandler.NettyChannel(fromId, ctx.channel()));
-                handshakeRespMsg = handshakeRespMsg.toBuilder().setHeader(handshakeRespMsg.getHeader().toBuilder().setExtend(resp.toString()).build()).build();
+                handshakeRespMsg = handshakeRespMsg.toBuilder().setExtend(resp.toString()).build();
                 ctx.channel().writeAndFlush(handshakeRespMsg);
             } else {
                 resp.put("status", -1);
                 ServerHandler.ChannelContainer.getInstance().removeChannelIfConnectNoActive(ctx.channel());
-                handshakeRespMsg = handshakeRespMsg.toBuilder().setHeader(handshakeRespMsg.getHeader().toBuilder().setExtend(resp.toString()).build()).build();
+                handshakeRespMsg = handshakeRespMsg.toBuilder().setExtend(resp.toString()).build();
                 ChannelFuture future = ctx.channel().writeAndFlush(handshakeRespMsg);
                 future.addListener(ChannelFutureListener.CLOSE);
             }
@@ -72,8 +72,8 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private boolean validUserToken(String userName, String token) {
-        Optional<User> userOptional = userService.getUserRepo().findByName(userName);
+    private boolean validUserToken(Long id, String token) {
+        Optional<User> userOptional = userRepo.findById(id);
         if (userOptional.isPresent()) {
             Optional<JwtAuthentication> authentication = jwtService.parse(token);
             if (authentication.isPresent()) {

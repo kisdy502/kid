@@ -37,13 +37,13 @@ public class ClientReportMessageHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
-        if (message == null || message.getHeader() == null) {
+        if (message == null) {
             return;
         }
 
-        int msgType = message.getHeader().getMsgType();
+        int msgType = message.getMsgType();
         if (msgType == MessageType.CLIENT_MSG_RECEIVED_STATUS_REPORT.getMsgType()) {
-            Optional<AppMessage> appMessageOptional = appMessageRepo.findByMessageId(message.getHeader().getMsgId());
+            Optional<AppMessage> appMessageOptional = appMessageRepo.findByMessageId(message.getMsgId());
             appMessageOptional.ifPresent(new Consumer<AppMessage>() {
                 @Override
                 public void accept(AppMessage appMessage) {

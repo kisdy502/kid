@@ -77,11 +77,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             return null;
         }
 
-        public String getUserIdByChannel(Channel channel) {
+        public Long getUserIdByChannel(Channel channel) {
             return getUserIdByChannel(channel.id().toString());
         }
 
-        public String getUserIdByChannel(String channelId) {
+        public Long getUserIdByChannel(String channelId) {
             if (CHANNELS.containsKey(channelId)) {
                 return CHANNELS.get(channelId).getUserId();
             }
@@ -89,7 +89,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             return null;
         }
 
-        public NettyChannel getActiveChannelByUserId(String userId) {
+        public NettyChannel getActiveChannelByUserId(Long userId) {
             for (Map.Entry<String, NettyChannel> entry : CHANNELS.entrySet()) {
                 if (entry.getValue().getUserId().equals(userId) && entry.getValue().isActive()) {
                     return entry.getValue();
@@ -105,11 +105,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     public static class NettyChannel {
 
-        private String userId;
+        private Long userId;
         private Channel channel;
         private String address;
 
-        public NettyChannel(String userId, Channel channel) {
+        public NettyChannel(Long userId, Channel channel) {
             this.userId = userId;
             this.channel = channel;
             address = channel.remoteAddress().toString();
@@ -119,11 +119,11 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             return channel.id().toString();
         }
 
-        public String getUserId() {
+        public Long getUserId() {
             return userId;
         }
 
-        public void setUserId(String userId) {
+        public void setUserId(Long userId) {
             this.userId = userId;
         }
 

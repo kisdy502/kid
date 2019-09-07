@@ -26,16 +26,15 @@ public class HandleOutlineMessageSendedHandler extends ChannelInboundHandlerAdap
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
-        if (message == null || message.getHeader() == null) {
+        if (message == null) {
             return;
         }
 
-        int msgType = message.getHeader().getMsgType();
+        int msgType = message.getMsgType();
         if (msgType == MessageType.REPORT_RECEIVED_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("离线消息已被客户端接收：" + message);
-            if (message.getBody() != null) {
-                message.getBody();
-                JSONObject jsonObj = JSON.parseObject(message.getBody());
+            if (message.getContent() != null) {
+                JSONObject jsonObj = JSON.parseObject(message.getContent());
                 String received_messageId_list = jsonObj.getString("received_messageId_list");
                 String[] idArray = received_messageId_list.split(",");
                 for (String msgId : idArray) {

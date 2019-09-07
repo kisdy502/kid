@@ -13,5 +13,5 @@ import java.util.Optional;
 @Repository
 public interface UserRelationRepo extends CrudRepository<UserRelation, Long> {
 
-    Optional<List<UserRelation>> findByMyName(String myName);
+    Optional<List<UserRelation>> findByMyId(Long myId);
 }

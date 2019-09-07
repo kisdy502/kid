@@ -1,4 +1,4 @@
-package com.sdt.kid.aio;
+package com.sdt.kid.aio.ssl;
 
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import io.netty.bootstrap.ServerBootstrap;
@@ -12,25 +12,42 @@ import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-/**
- * <p>@ProjectName:     BoChat</p>
- * <p>@ClassName:       NettyServerDemo.java</p>
- * <p>@PackageName:     com.bochat.im.netty</p>
- * <b>
- * <p>@Description:     TCP netty服务端</p>
- * </b>
- * <p>@author:          FreddyChen</p>
- * <p>@date:            2019/02/15 14:42</p>
- * <p>@email:           chenshichao@outlook.com</p>
- */
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
+
+
 @Service
-public class NettyServerDemo {
+public class SignleSSLServer {
 
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
-    public void startServer(String[] args) {
+    private String pkPath="security/server.jks";
+    private String serverPassword = "ServerNetty2019";
+    private SSLEngine sslEngine;
 
+    public static void main(String args){
+        SignleSSLServer server=new SignleSSLServer();
+        server.start();
+    }
+
+    public void start() {
+        initKeyStore();
+        if (sslEngine == null) {
+            logger.error("init SSL Failed...");
+        }
         //boss线程监听端口，worker线程负责数据读写
         EventLoopGroup boss = new NioEventLoopGroup();
         EventLoopGroup worker = new NioEventLoopGroup();
@@ -55,19 +72,7 @@ public class NettyServerDemo {
                             0, 2, 0, 2));
                     pipeline.addLast(new ProtobufDecoder(TransMessageProtobuf.TransMessage.getDefaultInstance()));
                     pipeline.addLast(new ProtobufEncoder());
-                    //处理类
-                    pipeline.addLast(new ServerHandler());
-                    pipeline.addLast(new HandhakeHandler());
-                    pipeline.addLast(new HeatResponseHandler());
-                    pipeline.addLast(new ClientReportMessageHandler());
-                    pipeline.addLast(new HandleFriendListHandler());
-                    pipeline.addLast(new HandleOutlineMessageListHandler());
-                    pipeline.addLast(new HandleOutlineMessageSendedHandler());
-                    pipeline.addLast(new HandleAddFreindHandler());
-                    pipeline.addLast(new HandleResendMessageListHandler());
-                    pipeline.addLast(new HandleCreateGroupHandler());
-                    pipeline.addLast(new HandleAddFriendResultHandler());
-                    pipeline.addLast(new HandleChatHandler());
+
                 }
             });
 
@@ -80,7 +85,7 @@ public class NettyServerDemo {
             bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
 
             //绑定端口
-            ChannelFuture future = bootstrap.bind(8866).sync().addListeners(new GenericFutureListener<Future<? super Void>>() {
+            ChannelFuture future = bootstrap.bind(9999).sync().addListeners(new GenericFutureListener<Future<? super Void>>() {
                 @Override
                 public void operationComplete(Future<? super Void> future) throws Exception {
                     if (future.isSuccess()) {
@@ -90,7 +95,6 @@ public class NettyServerDemo {
                     }
                 }
             });
-
 
             //等待服务端监听端口关闭,阻塞当前线程
             future.channel().closeFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
@@ -110,6 +114,44 @@ public class NettyServerDemo {
 
         }
     }
+
+    private void initKeyStore() {
+        KeyManagerFactory keyManagerFactory = null;
+        try {
+            KeyStore keyStore = KeyStore.getInstance("JKS");
+            InputStream in = new ClassPathResource(pkPath).getInputStream();
+            keyStore.load(in, serverPassword.toCharArray());
+            keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            keyManagerFactory.init(keyStore, serverPassword.toCharArray());
+            initSSL(keyManagerFactory.getKeyManagers());
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableKeyException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initSSL(KeyManager[] keyManagers) throws NoSuchAlgorithmException, KeyManagementException {
+
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(keyManagers, null, null);
+        sslEngine = sslContext.createSSLEngine();
+        sslEngine.setUseClientMode(false);       //客户端工作模式
+
+        logger.info("支持的协议: " + Arrays.asList(sslEngine.getSupportedProtocols()));
+        logger.info("启用的协议: " + Arrays.asList(sslEngine.getEnabledProtocols()));
+        logger.info("支持的加密套件: " + Arrays.asList(sslEngine.getSupportedCipherSuites()));
+        logger.info("启用的加密套件: " + Arrays.asList(sslEngine.getEnabledCipherSuites()));
+
+    }
 }
-
-

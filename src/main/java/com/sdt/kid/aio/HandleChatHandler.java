@@ -8,32 +8,30 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
-public class ChatHandler extends ChannelInboundHandlerAdapter {
+public class HandleChatHandler extends ChannelInboundHandlerAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private AppMessageRepo appMessageRepo;
 
-    public ChatHandler() {
+    public HandleChatHandler() {
         appMessageRepo = ApplicationContextProvider.getApplicationContext().getBean(AppMessageRepo.class, "appMessageRepo");
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
-        if (message == null || message.getHeader() == null) {
+        if (message == null) {
             return;
         }
 
-        int msgType = message.getHeader().getMsgType();
+        int msgType = message.getMsgType();
         if (msgType == MessageType.SINGLE_CHAT.getMsgType()) {
             System.out.println("聊天消息：" + message);
 
-            // 收到2001或3001消息，返回给客户端消息发送状态报告
-            String fromId = message.getHeader().getFromId();
+            Long fromId = message.getFromId();
             TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
@@ -48,7 +46,7 @@ public class ChatHandler extends ChannelInboundHandlerAdapter {
             appMessageRepo.save(appMessage);
 
             // 同时转发消息到接收方
-            String toId = message.getHeader().getToId();
+            Long toId = message.getToId();
             MessageHelper.forwardMessage(toId, message);
         } else {
             logger.debug("未知类型消息:" + message);

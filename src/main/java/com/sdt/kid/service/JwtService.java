@@ -51,7 +51,7 @@ public class JwtService {
 
     @PostConstruct
     private void init() throws Exception {
-
+        logger.error("keystore:"+keystore);
         CertificateFactory certificatefactory = CertificateFactory.getInstance("X.509");
         X509Certificate x509Cert = (X509Certificate) certificatefactory.generateCertificate(new ClassPathResource(cert).getInputStream());
         publicKey = x509Cert.getPublicKey();

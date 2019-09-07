@@ -12,12 +12,10 @@ public class AppMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank
-    private String fromId;         //发送人
-    @NotBlank
-    private String toId;           //接收人
-    private long sendTime;         //消息发送时间
-    private long endTime;          //消息过期时间，过期了，就可以删除了
+    private Long fromId;           //发送人
+    private Long toId;             //接收人
+    private Long sendTime;         //消息发送时间
+    private Long endTime;          //消息过期时间，过期了，就可以删除了
     @NotBlank
     private String messageId;
     private int messageType;
@@ -35,19 +33,19 @@ public class AppMessage {
         this.id = id;
     }
 
-    public String getFromId() {
+    public Long getFromId() {
         return fromId;
     }
 
-    public void setFromId(String fromId) {
+    public void setFromId(Long fromId) {
         this.fromId = fromId;
     }
 
-    public String getToId() {
+    public Long getToId() {
         return toId;
     }
 
-    public void setToId(String toId) {
+    public void setToId(Long toId) {
         this.toId = toId;
     }
 

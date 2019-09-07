@@ -22,6 +22,9 @@ public class User {
     @NotBlank
     private String name;
 
+    @Transient
+    private String token;
+
     @JsonIgnore
     @Transient
     private Set<String> authorities = new HashSet<>();
@@ -78,4 +81,11 @@ public class User {
         return String.format("%s(%s)", name, mobile);
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 }
