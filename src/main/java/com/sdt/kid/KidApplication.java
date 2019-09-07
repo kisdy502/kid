@@ -1,8 +1,10 @@
 package com.sdt.kid;
 
 import com.sdt.kid.aio.NettyServerDemo;
-import com.sdt.kid.aio.ssl.SignleSSLServer;
-import com.sdt.kid.aio.ssl.SignleSSLClient;
+import com.sdt.kid.aio.ssl.OneWaySSLServer;
+import com.sdt.kid.aio.ssl.OneWaySSLClient;
+import com.sdt.kid.aio.ssl.TwoWaySSLClient;
+import com.sdt.kid.aio.ssl.TwoWaySSLServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -17,11 +19,16 @@ public class KidApplication implements CommandLineRunner {
 
     @Resource
     NettyServerDemo demo;
-    @Resource
-    SignleSSLServer signleSSLServer;
 
     @Resource
-    SignleSSLClient signleSSlClient;
+    OneWaySSLServer oneWaySSLServer;
+    @Resource
+    OneWaySSLClient oneWaySSLClient;
+
+    @Resource
+    TwoWaySSLServer twoWaySSLServer;
+    @Resource
+    TwoWaySSLClient twoWaySSLClient;
 
 
     private static Logger logger = LoggerFactory.getLogger(KidApplication.class);
@@ -43,7 +50,9 @@ public class KidApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         //demo.startServer(args);
-        signleSSLServer.start();
-        //signleSSlClient.start();
+        oneWaySSLServer.start();
+        oneWaySSLClient.start();
+        twoWaySSLServer.start();
+        twoWaySSLClient.start();
     }
 }

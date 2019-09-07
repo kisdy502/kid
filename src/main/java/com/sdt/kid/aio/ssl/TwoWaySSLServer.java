@@ -16,12 +16,8 @@ import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
+import javax.net.ssl.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,18 +25,16 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 
-
-@Service
-public class SignleSSLServer {
+public class TwoWaySSLServer {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String pkPath="security/server.jks";
+    private String pkPath = "security/server.jks";
     private String serverPassword = "ServerNetty2019";
     private SSLEngine sslEngine;
 
-    public static void main(String args){
-        SignleSSLServer server=new SignleSSLServer();
+    public static void main(String[] args) {
+        TwoWaySSLServer server = new TwoWaySSLServer();
         server.start();
     }
 
@@ -119,14 +113,21 @@ public class SignleSSLServer {
     }
 
     private void initKeyStore() {
+        TrustManagerFactory trustManagerFactory = null;
+
         KeyManagerFactory keyManagerFactory = null;
         try {
             KeyStore keyStore = KeyStore.getInstance("JKS");
             InputStream in = new ClassPathResource(pkPath).getInputStream();
             keyStore.load(in, serverPassword.toCharArray());
+
             keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(keyStore, serverPassword.toCharArray());
-            initSSL(keyManagerFactory.getKeyManagers());
+
+            trustManagerFactory = TrustManagerFactory.getInstance("SunX509");
+            trustManagerFactory.init(keyStore);
+
+            initSSL(keyManagerFactory, trustManagerFactory);
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -144,12 +145,12 @@ public class SignleSSLServer {
         }
     }
 
-    private void initSSL(KeyManager[] keyManagers) throws NoSuchAlgorithmException, KeyManagementException {
-
+    private void initSSL(KeyManagerFactory keyManagerFactory, TrustManagerFactory trustManagerFactory) throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(keyManagers, null, null);
+        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
         sslEngine = sslContext.createSSLEngine();
         sslEngine.setUseClientMode(false);       //客户端工作模式
+        sslEngine.setNeedClientAuth(true);       //需要进行客户端认证
 
         logger.info("支持的协议: " + Arrays.asList(sslEngine.getSupportedProtocols()));
         logger.info("启用的协议: " + Arrays.asList(sslEngine.getEnabledProtocols()));

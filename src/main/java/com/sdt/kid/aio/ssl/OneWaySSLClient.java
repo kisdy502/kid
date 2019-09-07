@@ -45,10 +45,10 @@ import org.springframework.stereotype.Service;
  * </b>
  */
 @Service
-public class SignleSSLClient {
+public class OneWaySSLClient {
 
-    public static void main(String args){
-        SignleSSLClient client=new SignleSSLClient();
+    public static void main(String[] args){
+        OneWaySSLClient client=new OneWaySSLClient();
         client.start();
     }
 
@@ -63,7 +63,7 @@ public class SignleSSLClient {
 
     private SSLEngine sslEngine;
 
-    public SignleSSLClient() {
+    public OneWaySSLClient() {
     }
 
     public void start() {

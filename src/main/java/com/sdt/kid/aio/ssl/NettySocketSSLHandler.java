@@ -19,7 +19,7 @@ public class NettySocketSSLHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        logger.info("read:" + msg);
+        logger.info("channelRead:\n" + msg);
     }
 
     @Override
