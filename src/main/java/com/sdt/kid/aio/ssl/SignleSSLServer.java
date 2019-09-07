@@ -10,6 +10,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
@@ -72,6 +73,8 @@ public class SignleSSLServer {
                             0, 2, 0, 2));
                     pipeline.addLast(new ProtobufDecoder(TransMessageProtobuf.TransMessage.getDefaultInstance()));
                     pipeline.addLast(new ProtobufEncoder());
+
+                    pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
 
                 }
             });

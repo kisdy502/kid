@@ -56,7 +56,7 @@ public class SignleSSlClient {
     private int currentPort = 9999;
 
     private String clientPassword = "ClientNetty2019";
-    private String caFileName = "client.jks";
+    private String caFileName = "security/client.jks";
 
 
     private SSLEngine sslEngine;
@@ -98,6 +98,8 @@ public class SignleSSlClient {
         protected void initChannel(Channel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
 
+
+
             // netty提供的自定义长度解码器，解决TCP拆包/粘包问题
             pipeline.addLast("frameEncoder", new LengthFieldPrepender(2));
             pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(65535,
@@ -107,10 +109,10 @@ public class SignleSSlClient {
             pipeline.addLast(new ProtobufEncoder());
             pipeline.addLast(new ProtobufDecoder(TransMessageProtobuf.TransMessage.getDefaultInstance()));
 
-            pipeline.addLast(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
             pipeline.addFirst(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(
                     60000 * 3, 60000, 60000 * 4, TimeUnit.MILLISECONDS));
 
+            pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
         }
     }
 
