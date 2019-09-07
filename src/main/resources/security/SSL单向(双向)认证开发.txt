@@ -1,0 +1,81 @@
+SSL单向认证开发
+
+.jks				存储证书文件的文件
+.cer 				证书文件
+
+ServerNetty2019   //服务器密钥
+ClientNetty2019   //客户端密钥
+ 
+aliasserver       //服务器alias
+aliasclient       //客户端alias
+
+server            //服务端证书文件
+client            //客户端证书文件
+
+生成Netty服务端私钥和证书仓库命令：
+keytool -genkey 
+-alias aliasserver 
+-keysize 2048
+-validity 36500
+-keyalg RSA 
+-dname "CN=(SS)OU=(SS)O=(SS)L=(BJ)ST=(BJ)C=(CN)" 
+-keypass ServerNetty2019
+-storepass ServerNetty2019 
+-keystore server.jks
+
+keytool -genkey -alias aliasserver -keysize 2048 -validity 36500 -keyalg RSA -dname "CN=(SS)OU=(SS)O=(SS)L=(BJ)ST=(BJ)C=(CN)" -keypass ServerNetty2019 -storepass ServerNetty2019 -keystore server.jks
+
+
+生成Netty服务端自签名证书：
+keytool -export 
+-alias aliasserver 
+-keystore server.jks 
+-storepass ServerNetty2019 
+-file Server.cer
+
+keytool -export -alias aliasserver -keystore Server.jks -storepass ServerNetty2019 -file server.cer 
+
+
+生成客户端的密钥对和证书仓库，用于将服务端的证书保存到客户端的授信证书仓库中，命令如下
+
+keytool -genkey 
+-alias aliasclient 
+-keysize 2048 
+-validity 36500
+-keyalg RSA 
+-dname "CN=(SS)OU=(SS)O=(SS)L=(BJ)ST=(BJ)C=(CN)" 
+-keypass ClientNetty2019
+-storepass ClientNetty2019 
+-keystore client.jks
+
+keytool -genkey -alias aliasclient -keysize 2048 -validity 36500 -keyalg RSA -dname "CN=(SS)OU=(SS)O=(SS)L=(BJ)ST=(BJ)C=(CN)" -keypass ClientNetty2019 -storepass ClientNetty2019 -keystore client.jks
+
+将Netty服务端的证书导入到客户端的证书仓库中，命令如下：
+keytool -import 
+-trustcacerts
+-alias aliasserver 
+-file Server.cer
+-storepass ClientNetty2019 
+-keystore client.jks
+
+keytool -import -trustcacerts -alias aliasserver -file server.cer -storepass ClientNetty2019 -keystore client.jks
+
+
+
+SSL双向认证，在前面单向的步骤上，额外操作
+
+生成客户端的自签名证书：
+
+keytool -export 
+-alias aliasclient 
+-keystore client.jks 
+-storepass ClientNetty2019 
+-file client.cer
+
+keytool -export -alias aliasclient -keystore client.jks -storepass ClientNetty2019 -file client.cer 
+
+
+最后，将客户端的自签名证书导入到服务端的信任证书仓库中：
+
+keytool -import -trustcacerts -alias aliasclient -file client.cer -storepass ServerNetty2019 -keystore server.jks
+
