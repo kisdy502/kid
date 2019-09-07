@@ -2,7 +2,7 @@ package com.sdt.kid;
 
 import com.sdt.kid.aio.NettyServerDemo;
 import com.sdt.kid.aio.ssl.SignleSSLServer;
-import com.sdt.kid.aio.ssl.SignleSSlClient;
+import com.sdt.kid.aio.ssl.SignleSSLClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -21,7 +21,7 @@ public class KidApplication implements CommandLineRunner {
     SignleSSLServer signleSSLServer;
 
     @Resource
-    SignleSSlClient signleSSlClient;
+    SignleSSLClient signleSSlClient;
 
 
     private static Logger logger = LoggerFactory.getLogger(KidApplication.class);
@@ -44,6 +44,6 @@ public class KidApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         //demo.startServer(args);
         signleSSLServer.start();
-        signleSSlClient.start();
+        //signleSSlClient.start();
     }
 }

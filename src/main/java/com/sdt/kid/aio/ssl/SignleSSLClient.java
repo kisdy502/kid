@@ -34,6 +34,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
 
 /**
  * <p>@author:          ${Author}</p>
@@ -43,10 +44,11 @@ import org.springframework.core.io.ClassPathResource;
  * <p>@Description:     ${Description}</p>
  * </b>
  */
-public class SignleSSlClient {
+@Service
+public class SignleSSLClient {
 
     public static void main(String args){
-        SignleSSlClient client=new SignleSSlClient();
+        SignleSSLClient client=new SignleSSLClient();
         client.start();
     }
 
@@ -61,7 +63,7 @@ public class SignleSSlClient {
 
     private SSLEngine sslEngine;
 
-    public SignleSSlClient() {
+    public SignleSSLClient() {
     }
 
     public void start() {
