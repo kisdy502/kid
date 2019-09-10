@@ -43,6 +43,12 @@ public class ClientReportMessageHandler extends ChannelInboundHandlerAdapter {
 
         int msgType = message.getMsgType();
         if (msgType == MessageType.CLIENT_MSG_RECEIVED_STATUS_REPORT.getMsgType()) {
+
+            Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
             Optional<AppMessage> appMessageOptional = appMessageRepo.findByMessageId(message.getMsgId());
             appMessageOptional.ifPresent(new Consumer<AppMessage>() {
                 @Override

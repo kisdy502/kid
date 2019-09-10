@@ -33,6 +33,15 @@ public class HandleOutlineMessageSendedHandler extends ChannelInboundHandlerAdap
         int msgType = message.getMsgType();
         if (msgType == MessageType.REPORT_RECEIVED_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("离线消息已被客户端接收：" + message);
+
+            Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
+
             if (message.getContent() != null) {
                 JSONObject jsonObj = JSON.parseObject(message.getContent());
                 String received_messageId_list = jsonObj.getString("received_messageId_list");

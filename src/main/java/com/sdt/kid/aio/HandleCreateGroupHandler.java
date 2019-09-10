@@ -40,10 +40,15 @@ public class HandleCreateGroupHandler extends ChannelInboundHandlerAdapter {
         if (msgType == MessageType.MESSAGE_REQUEST_CREATE_GROUP.getMsgType()) {
 
             Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:"+fromId);
+            logger.info("fId:"+fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
+
             Optional<User> senderOption = userRepo.findById(fromId);
             if (senderOption.isPresent()) {
-                TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
-                MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
                 //save message to db
                 AppMessage appMessage = MessageHelper.ProtobufMsgToAppMessage(message);
@@ -65,17 +70,16 @@ public class HandleCreateGroupHandler extends ChannelInboundHandlerAdapter {
 
                 UserGroup savedGroup = userGroupRepo.save(userGroup);
 
-                TransMessageProtobuf.TransMessage transMessage = MessageHelper.getGroupCreatedMessage(savedGroup);
+                TransMessageProtobuf.TransMessage.Builder builder = MessageHelper.buildGroupCreatedMessage(savedGroup);
+                builder.setFromId(0L);
+                builder.setToId(fromId);
+                TransMessageProtobuf.TransMessage transMessage = builder.build();
 
                 AppMessage groupCreatedMessage = MessageHelper.ProtobufMsgToAppMessage(transMessage);
-                groupCreatedMessage.setFromId(fromId);
-                groupCreatedMessage.setToId(fromId);
                 appMessageRepo.save(groupCreatedMessage);
 
                 ctx.channel().writeAndFlush(transMessage);
             }
-
-
         } else {
             ctx.fireChannelRead(msg);
         }

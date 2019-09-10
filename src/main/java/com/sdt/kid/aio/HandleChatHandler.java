@@ -29,10 +29,15 @@ public class HandleChatHandler extends ChannelInboundHandlerAdapter {
 
         int msgType = message.getMsgType();
         if (msgType == MessageType.SINGLE_CHAT.getMsgType()) {
-            System.out.println("聊天消息：" + message);
+            logger.info("聊天消息：" + message);
 
             Long fromId = message.getFromId();
-            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
             //save message to db
@@ -53,7 +58,6 @@ public class HandleChatHandler extends ChannelInboundHandlerAdapter {
             ctx.fireChannelRead(msg);
         }
     }
-
 
 
 }

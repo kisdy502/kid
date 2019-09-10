@@ -12,18 +12,18 @@ public class AppMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long fromId;           //发送人
-    private Long toId;             //接收人
-    private Long sendTime;         //消息发送时间
-    private Long endTime;          //消息过期时间，过期了，就可以删除了
+    private Long fromId;                     //发送人
+    private Long toId;                       //接收人
+    private Long sendTime;                   //消息发送时间
+    private Long endTime;                    //消息过期时间，过期了，就可以删除了
     @NotBlank
     private String messageId;
     private int messageType;
-    private int messageContentType;     //文本 ，语音 ，图片，视频  0，1，2，3
-    private int statusReport;           //0 默认状态，已发送，未收到消息回执,1已发送给接收人，收到消息回执
-    private String extend;              //头扩展内容
+    private int messageContentType;           //文本 ，语音 ，图片，视频  0，1，2，3
+    private int statusReport = 0;             //0 默认状态，已发送，未收到消息回执,1已发送给接收人，收到消息回执
+    private String extend;                    //头扩展内容
     @Column(length = 65536)
-    private String content;             //消息内容
+    private String content;                   //消息内容
 
     public Long getId() {
         return id;

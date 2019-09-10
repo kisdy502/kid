@@ -35,8 +35,12 @@ public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
         int msgType = message.getMsgType();
         if (msgType == MessageType.MESSAGE_REQUEST_ADD_FRIEND.getMsgType()) {
 
-            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
             Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
             AppMessage appMessage = MessageHelper.ProtobufMsgToAppMessage(message);

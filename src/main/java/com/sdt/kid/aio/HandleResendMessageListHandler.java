@@ -28,11 +28,19 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         TransMessageProtobuf.TransMessage message = (TransMessageProtobuf.TransMessage) msg;
 
-
         int msgType = message.getMsgType();
         if (msgType == MessageType.RESEND_FAILED_MESSAGE_LIST.getMsgType()) {
             String messageListString = message.getContent();
             logger.info("重发消息列表:" + messageListString);
+            Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
+
+
             if (StringUtils.isEmpty(messageListString)) {
                 return;
             }
@@ -45,10 +53,9 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
             logger.info("appMessageList:" + appMessageList.toString());
             for (AppMessage appMessage : appMessageList) {
 
-                TransMessageProtobuf.TransMessage transMessage = MessageHelper.getProtoBufMessageBuilderByAppMessage(appMessage);
+                TransMessageProtobuf.TransMessage transMessage = MessageHelper.getProtoBufMessageBuilderByAppMessage(appMessage).build();
 
-                TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
-                Long fromId = message.getFromId();
+                reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
                 MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
                 Optional<AppMessage> optional = appMessageRepo.findByMessageId(appMessage.getMessageId());
@@ -56,6 +63,7 @@ public class HandleResendMessageListHandler extends ChannelInboundHandlerAdapter
                     logger.info("消息已经接收,无需再发了...", appMessage.getMessageId());
                     return;
                 }
+
                 appMessage.setStatusReport(0);
                 appMessage.setEndTime(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7);
                 appMessageRepo.save(appMessage);

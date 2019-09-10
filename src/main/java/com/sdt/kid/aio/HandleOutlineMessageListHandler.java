@@ -29,12 +29,20 @@ public class HandleOutlineMessageListHandler extends ChannelInboundHandlerAdapte
         int msgType = message.getMsgType();
         if (msgType == MessageType.GET_OUTLINE_MESSAGE_LIST.getMsgType()) {
             logger.debug("请求离线消息List：" + message);
+            Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
+
             Optional<List<AppMessage>> optional = appMessageRepo.findByToIdEqualsAndStatusReportEqualsAndEndTimeGreaterThan(
                     message.getFromId(), 0, System.currentTimeMillis());
             optional.ifPresent(new Consumer<List<AppMessage>>() {
                 @Override
                 public void accept(List<AppMessage> appMessageList) {
-                    ctx.channel().writeAndFlush(MessageHelper.getOutLineList(appMessageList));
+                    ctx.channel().writeAndFlush(MessageHelper.buildOutLineList(appMessageList).build());
                 }
             });
         } else {

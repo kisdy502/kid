@@ -39,8 +39,12 @@ public class HandleAddFriendResultHandler extends ChannelInboundHandlerAdapter {
         int msgType = message.getMsgType();
         if (msgType == MessageType.MESSAGE_AGREE_OR_REFUSE_ADD_FRIEND.getMsgType()) {
 
-            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.getReportStatusMessage(message);
             Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             Long toId = message.getToId();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
@@ -62,8 +66,8 @@ public class HandleAddFriendResultHandler extends ChannelInboundHandlerAdapter {
                     friend.setFriendId(fromId);
                     friend.setName(userMy.getName());
                     friend.setMobile(userMy.getMobile());
-                    TransMessageProtobuf.TransMessage fromMsg = MessageHelper.getAgreeAddFriendMessage(friend, 0L,
-                            toId);
+                    TransMessageProtobuf.TransMessage fromMsg = MessageHelper.buildAgreeAddFriendMessage(friend, 0L,
+                            toId).build();
                     MessageHelper.forwardMessage(toId, fromMsg);
                 }
 
@@ -75,13 +79,13 @@ public class HandleAddFriendResultHandler extends ChannelInboundHandlerAdapter {
                     friend.setFriendId(toId);
                     friend.setName(userFriend.getName());
                     friend.setMobile(userFriend.getMobile());
-                    TransMessageProtobuf.TransMessage toMsg = MessageHelper.getAgreeAddFriendMessage(friend, 0L,
-                            fromId);
+                    TransMessageProtobuf.TransMessage toMsg = MessageHelper.buildAgreeAddFriendMessage(friend, 0L,
+                            fromId).build();
                     MessageHelper.forwardMessage(fromId, toMsg);
                 }
             } else if ("false".equalsIgnoreCase(message.getContent())) {
-                TransMessageProtobuf.TransMessage fromMsg = MessageHelper.getRefuseAddFriendMessage(0L, fromId);
-                TransMessageProtobuf.TransMessage toMsg = MessageHelper.getRefuseAddFriendMessage(0L, message.getToId());
+                TransMessageProtobuf.TransMessage fromMsg = MessageHelper.buildRefuseAddFriendMessage(0L, fromId).build();
+                TransMessageProtobuf.TransMessage toMsg = MessageHelper.buildRefuseAddFriendMessage(0L, message.getToId()).build();
                 MessageHelper.forwardMessage(fromId, fromMsg);
                 MessageHelper.forwardMessage(message.getToId(), toMsg);
             }

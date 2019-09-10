@@ -39,6 +39,10 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
         if (msgType == MessageType.HANDSHAKE.getMsgType()) {
             logger.debug("处理握手验证消息：" + handshakeRespMsg);
             Long fromId = handshakeRespMsg.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
+
             JSONObject jsonObj = JSON.parseObject(handshakeRespMsg.getExtend());
             String token = jsonObj.getString("token");
             logger.info("fromId:" + fromId);
@@ -50,7 +54,7 @@ public class HandhakeHandler extends ChannelInboundHandlerAdapter {
                 //原来已经登录的被踢下线
                 ServerHandler.NettyChannel prevChannel = ServerHandler.ChannelContainer.getInstance().getActiveChannelByUserId(fromId);
                 if (prevChannel != null) {
-                    TransMessageProtobuf.TransMessage transMessage = MessageHelper.getForceLogoutMessage();
+                    TransMessageProtobuf.TransMessage transMessage = MessageHelper.buildForceLogoutMessage().build();
                     ChannelFuture future = prevChannel.getChannel().writeAndFlush(transMessage);
                     future.addListener(ChannelFutureListener.CLOSE);
                     ServerHandler.ChannelContainer.getInstance().removeChannelIfConnectNoActive(prevChannel.getChannel());

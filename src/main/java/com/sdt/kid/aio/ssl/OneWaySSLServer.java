@@ -116,8 +116,6 @@ public class OneWaySSLServer {
     }
 
     private void initKeyStore() {
-
-
         KeyManagerFactory keyManagerFactory = null;
         try {
             KeyStore keyStore = KeyStore.getInstance("JKS");
@@ -126,8 +124,6 @@ public class OneWaySSLServer {
             keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(keyStore, serverPassword.toCharArray());
             initSSL(keyManagerFactory.getKeyManagers());
-
-
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -150,7 +146,7 @@ public class OneWaySSLServer {
         SSLContext sslContext = SSLContext.getInstance("SSL");
         sslContext.init(keyManagers, null, null);
         sslEngine = sslContext.createSSLEngine();
-        sslEngine.setUseClientMode(false);       //客户端工作模式
+        sslEngine.setUseClientMode(false);                              //客户端工作模式
 
         logger.info("支持的协议: " + Arrays.asList(sslEngine.getSupportedProtocols()));
         logger.info("启用的协议: " + Arrays.asList(sslEngine.getEnabledProtocols()));

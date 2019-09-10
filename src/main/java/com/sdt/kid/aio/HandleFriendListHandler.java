@@ -37,7 +37,13 @@ public class HandleFriendListHandler extends ChannelInboundHandlerAdapter {
         int msgType = message.getMsgType();
         if (msgType == MessageType.GET_USER_FRIEND_LIST.getMsgType()) {
             logger.debug("请求好友列表：" + message);
+            Long fromId = message.getFromId();
+            Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
 
+            TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
+            MessageHelper.forwardMessage(fromId, reportStatusMessage);
             //TODO 优化代码，提高效率
             if (userRelationRepo.findByMyId(message.getFromId()).isPresent()) {
                 List<UserRelation> userRelations = userRelationRepo.findByMyId(message.getFromId()).get();
@@ -55,9 +61,9 @@ public class HandleFriendListHandler extends ChannelInboundHandlerAdapter {
                         friendList.add(friend);
                     }
                 }
-                ctx.channel().writeAndFlush(MessageHelper.getRealtionListMessage(friendList));
+                ctx.channel().writeAndFlush(MessageHelper.buildRealtionListMessage(friendList).build());
             } else {
-                ctx.channel().writeAndFlush(MessageHelper.getRealtionListMessage(new ArrayList<Friend>()));
+                ctx.channel().writeAndFlush(MessageHelper.buildRealtionListMessage(new ArrayList<Friend>()).build());
             }
         } else {
             ctx.fireChannelRead(msg);
