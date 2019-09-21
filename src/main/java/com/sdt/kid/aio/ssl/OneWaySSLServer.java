@@ -2,6 +2,7 @@ package com.sdt.kid.aio.ssl;
 
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -10,6 +11,9 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
+import io.netty.handler.ssl.ClientAuth;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -19,6 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import javax.net.ssl.*;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +37,8 @@ public class OneWaySSLServer {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String pkPath = "security/server.jks";
-    private String serverPassword = "ServerNetty2019";
+    private String privateKeyPath = "security/root.key.pk8";
+    private String serverPassword = "root";
     private SSLEngine sslEngine;
 
     public static void main(String[] args) {
@@ -42,7 +47,7 @@ public class OneWaySSLServer {
     }
 
     public void start() {
-        initKeyStore();
+        initSSL();
         if (sslEngine == null) {
             logger.error("init SSL Failed...");
         }
@@ -71,7 +76,7 @@ public class OneWaySSLServer {
                     pipeline.addLast(new ProtobufDecoder(TransMessageProtobuf.TransMessage.getDefaultInstance()));
                     pipeline.addLast(new ProtobufEncoder());
 
-                    pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
+                    pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine, true));
                     pipeline.addLast(NettySocketSSLHandler.class.getSimpleName(), new NettySocketSSLHandler());
                 }
             });
@@ -118,12 +123,11 @@ public class OneWaySSLServer {
     private void initKeyStore() {
         KeyManagerFactory keyManagerFactory = null;
         try {
-            KeyStore keyStore = KeyStore.getInstance("JKS");
-            InputStream in = new ClassPathResource(pkPath).getInputStream();
+            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            InputStream in = new ClassPathResource(privateKeyPath).getInputStream();
             keyStore.load(in, serverPassword.toCharArray());
             keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(keyStore, serverPassword.toCharArray());
-            initSSL(keyManagerFactory.getKeyManagers());
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
@@ -136,17 +140,26 @@ public class OneWaySSLServer {
             e.printStackTrace();
         } catch (UnrecoverableKeyException e) {
             e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
         }
     }
 
-    private void initSSL(KeyManager[] keyManagers) throws NoSuchAlgorithmException, KeyManagementException {
-
-        SSLContext sslContext = SSLContext.getInstance("SSL");
-        sslContext.init(keyManagers, null, null);
-        sslEngine = sslContext.createSSLEngine();
-        sslEngine.setUseClientMode(false);                              //客户端工作模式
+    private void initSSL() {
+        try {
+            File keyFile = new File("security/root.key.pk8");
+            if (keyFile == null) {
+                System.out.println("keyFile is null");
+            }
+            File certChainFile = new File("security/root.crt");
+            if (keyFile == null) {
+                System.out.println("certChainFile is null");
+            }
+            SslContext sslContext = SslContextBuilder.forServer(certChainFile, keyFile, serverPassword).clientAuth(ClientAuth.NONE).build();
+            sslEngine = sslContext.newEngine(ByteBufAllocator.DEFAULT);
+            sslEngine.setUseClientMode(false);
+        } catch (SSLException e) {
+            e.printStackTrace();
+        }
+        //客户端工作模式
 
         logger.info("支持的协议: " + Arrays.asList(sslEngine.getSupportedProtocols()));
         logger.info("启用的协议: " + Arrays.asList(sslEngine.getEnabledProtocols()));

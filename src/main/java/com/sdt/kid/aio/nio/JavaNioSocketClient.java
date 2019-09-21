@@ -16,7 +16,8 @@ public class JavaNioSocketClient {
 
     public void start() {
 
-        try (SocketChannel socketChannel = SocketChannel.open()) {
+        try{
+            SocketChannel socketChannel = SocketChannel.open();
             //连接服务端socket
             SocketAddress socketAddress = new InetSocketAddress("localhost", 8888);
             socketChannel.connect(socketAddress);

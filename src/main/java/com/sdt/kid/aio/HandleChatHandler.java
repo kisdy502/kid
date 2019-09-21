@@ -36,7 +36,6 @@ public class HandleChatHandler extends ChannelInboundHandlerAdapter {
             logger.info("fromId:" + fromId);
             logger.info("fId:" + fId);
 
-
             TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
@@ -54,7 +53,6 @@ public class HandleChatHandler extends ChannelInboundHandlerAdapter {
             Long toId = message.getToId();
             MessageHelper.forwardMessage(toId, message);
         } else {
-            logger.debug("未知类型消息:" + message);
             ctx.fireChannelRead(msg);
         }
     }

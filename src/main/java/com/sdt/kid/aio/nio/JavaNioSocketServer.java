@@ -22,12 +22,14 @@ public class JavaNioSocketServer {
 
     public void start() {
         //创建serverSocketChannel，监听8888端口
-        try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
+
+        try {
+            ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
+            Selector selector = Selector.open();
             serverSocketChannel.socket().bind(new InetSocketAddress(8888));
             //设置为非阻塞模式
             serverSocketChannel.configureBlocking(false);
             //为serverChannel注册selector
-            Selector selector = Selector.open();
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
             System.out.println("服务端开始工作：");

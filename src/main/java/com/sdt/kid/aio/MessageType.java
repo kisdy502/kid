@@ -97,6 +97,17 @@ public enum MessageType {
      */
     MESSAGE_REQUEST_CREATE_GROUP_RESULT(1120),
 
+
+    /*
+     * 申请加群
+     */
+    MESSAGE_ASK_FOR_ADD_GROUP(1121),
+
+    /*
+     * 邀请加群
+     */
+    MESSAGE_INVITATION_ADD_GROUP(1123),
+
     /**
      * 单聊消息
      */

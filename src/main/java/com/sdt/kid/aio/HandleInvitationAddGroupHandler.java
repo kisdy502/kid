@@ -1,27 +1,22 @@
 package com.sdt.kid.aio;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
-import com.sdt.kid.bean.AppMessage;
-import com.sdt.kid.bean.User;
-import com.sdt.kid.repo.AppMessageRepo;
+import com.sdt.kid.repo.UserRelationRepo;
 import com.sdt.kid.repo.UserRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Optional;
-
-public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
+public class HandleInvitationAddGroupHandler extends ChannelInboundHandlerAdapter {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
-    private AppMessageRepo appMessageRepo;
+    private UserRelationRepo userRelationRepo;
     private UserRepo userRepo;
 
-    public HandleAddFreindHandler() {
-        appMessageRepo = ApplicationContextProvider.getApplicationContext().getBean(AppMessageRepo.class, "appMessageRepo");
+    public HandleInvitationAddGroupHandler() {
+        userRelationRepo = ApplicationContextProvider.getApplicationContext().getBean(UserRelationRepo.class, "userRelationRepo");
         userRepo = ApplicationContextProvider.getApplicationContext().getBean(UserRepo.class, "userRepo");
     }
 
@@ -33,8 +28,8 @@ public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
         }
 
         int msgType = message.getMsgType();
-        if (msgType == MessageType.MESSAGE_REQUEST_ADD_FRIEND.getMsgType()) {
-            logger.info("请求添加好友 message:" + message);
+        if (msgType == MessageType.MESSAGE_INVITATION_ADD_GROUP.getMsgType()) {
+            logger.debug("邀请加群：" + message);
             Long fromId = message.getFromId();
             Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
             logger.info("fromId:" + fromId);
@@ -43,23 +38,25 @@ public class HandleAddFreindHandler extends ChannelInboundHandlerAdapter {
             TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
 
-            AppMessage appMessage = MessageHelper.ProtobufMsgToAppMessage(message);
-            appMessageRepo.save(appMessage);
-
-            Optional<User> userOptional = userRepo.findById(fromId);
-            if (userOptional.isPresent()) {
-                User user = userOptional.get();
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("id", user.getId());
-                jsonObject.put("name", user.getName());
-                jsonObject.put("mobile", user.getMobile());
-                jsonObject.put("tip", message.getContent());
-                message = message.toBuilder().setContent(jsonObject.toJSONString()).build();
-                MessageHelper.forwardMessage(message.getToId(), message);
+            String result = message.getContent();
+            long[] userIdArray = string2LongArray(result);
+            for (long userId : userIdArray) {
+                MessageHelper.forwardMessage(fromId, MessageHelper.buildInvitationAddGroupMessageBuild(fromId, userId).build());
             }
+
         } else {
             ctx.fireChannelRead(msg);
         }
+    }
+
+
+    private long[] string2LongArray(String content) {
+        String[] strings = content.split(",");
+        long[] userIdArray = new long[strings.length];
+        for (int i = 0, len = strings.length; i < len; i++) {
+            userIdArray[i] = Long.parseLong(strings[i]);
+        }
+        return userIdArray;
     }
 
 

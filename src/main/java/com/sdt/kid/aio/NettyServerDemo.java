@@ -57,6 +57,8 @@ public class NettyServerDemo {
                     pipeline.addLast(new ProtobufEncoder());
                     //处理类
                     pipeline.addLast(new ServerHandler());
+                    pipeline.addLast(new HandleChatHandler());
+                    pipeline.addLast(new HandleGroupChatHandler());
                     pipeline.addLast(new HandhakeHandler());
                     pipeline.addLast(new HeatResponseHandler());
                     pipeline.addLast(new ClientReportMessageHandler());
@@ -67,7 +69,8 @@ public class NettyServerDemo {
                     pipeline.addLast(new HandleResendMessageListHandler());
                     pipeline.addLast(new HandleCreateGroupHandler());
                     pipeline.addLast(new HandleAddFriendResultHandler());
-                    pipeline.addLast(new HandleChatHandler());
+                    pipeline.addLast(new HandleInvitationAddGroupHandler());
+
                 }
             });
 

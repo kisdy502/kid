@@ -113,8 +113,4 @@ public class AppMessage {
         this.content = content;
     }
 
-    @Override
-    public String toString() {
-        return JSON.toJSONString(this);
-    }
 }

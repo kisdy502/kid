@@ -2,6 +2,7 @@ package com.sdt.kid.aio.ssl;
 
 
 import com.sdt.im.protobuf.TransMessageProtobuf;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,14 +48,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class OneWaySSLClient {
 
-    public static void main(String[] args){
-        OneWaySSLClient client=new OneWaySSLClient();
+    private Logger logger = LoggerFactory.getLogger(getClass());
+
+    public static void main(String[] args) {
+        OneWaySSLClient client = new OneWaySSLClient();
         client.start();
     }
 
-    private Logger logger = LoggerFactory.getLogger(getClass());
 
-    private String currentHost = "192.168.66.81";
+    private String currentHost = "localhost";
     private int currentPort = 9999;
 
     private String clientPassword = "ClientNetty2019";
@@ -93,13 +95,14 @@ public class OneWaySSLClient {
         } finally {
             workGroup.shutdownGracefully();
         }
+
+        logger.info("end start");
     }
 
     private class TCPChannelInitializerHandler extends ChannelInitializer<Channel> {
         @Override
         protected void initChannel(Channel ch) throws Exception {
             final ChannelPipeline pipeline = ch.pipeline();
-
 
 
             // netty提供的自定义长度解码器，解决TCP拆包/粘包问题
@@ -114,7 +117,7 @@ public class OneWaySSLClient {
             pipeline.addFirst(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(
                     60000 * 3, 60000, 60000 * 4, TimeUnit.MILLISECONDS));
 
-            pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine));
+            pipeline.addFirst(SslHandler.class.getSimpleName(), new SslHandler(sslEngine, false));
             pipeline.addLast(NettySocketSSLHandler.class.getSimpleName(), new NettySocketSSLHandler());
         }
     }

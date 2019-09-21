@@ -1,5 +1,7 @@
 package com.sdt.kid.aio;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sdt.im.protobuf.TransMessageProtobuf;
 import com.sdt.kid.ApplicationContextProvider;
 import com.sdt.kid.bean.AppMessage;
@@ -11,6 +13,8 @@ import com.sdt.kid.repo.UserGroupRepo;
 import com.sdt.kid.repo.UserRepo;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +45,8 @@ public class HandleCreateGroupHandler extends ChannelInboundHandlerAdapter {
 
             Long fromId = message.getFromId();
             Long fId = ServerHandler.ChannelContainer.getInstance().getUserIdByChannel(ctx.channel());
-            logger.info("fromId:"+fromId);
-            logger.info("fId:"+fId);
+            logger.info("fromId:" + fromId);
+            logger.info("fId:" + fId);
 
             TransMessageProtobuf.TransMessage reportStatusMessage = MessageHelper.buildReportStatusMessageBuild(message).build();
             MessageHelper.forwardMessage(fromId, reportStatusMessage);
@@ -60,7 +64,7 @@ public class HandleCreateGroupHandler extends ChannelInboundHandlerAdapter {
                 }
                 appMessageRepo.save(appMessage);
 
-                UserGroup userGroup = new UserGroup();
+                UserGroup userGroup = JSON.parseObject(message.getContent(), UserGroup.class);
                 userGroup.setCreateTime(System.currentTimeMillis());
                 userGroup.setCreatorId(senderOption.get().getId());
                 GroupMember groupMember = new GroupMember();

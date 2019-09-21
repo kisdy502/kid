@@ -14,6 +14,7 @@ public class MessageHelper {
 
     private static Logger logger = LoggerFactory.getLogger(MessageHelper.class);
 
+
     public static TransMessageProtobuf.TransMessage.Builder buildReportStatusMessageBuild(TransMessageProtobuf.TransMessage message) {
         // 收到2001或3001消息，返回给客户端消息发送状态报告
         return buildAppMessageBuild(message.getMsgId(), 0L, 0L,
@@ -29,8 +30,8 @@ public class MessageHelper {
     public static TransMessageProtobuf.TransMessage.Builder buildGroupCreatedMessage(UserGroup userGroup) {
         return buildAppMessageBuild(UUID.randomUUID().toString(), 0L, 0L,
                 MessageType.MESSAGE_REQUEST_CREATE_GROUP_RESULT.getMsgType(),
-                JSON.toJSONString(userGroup),
                 "",
+                JSON.toJSONString(userGroup),
                 System.currentTimeMillis(),
                 0
         );
@@ -83,6 +84,17 @@ public class MessageHelper {
                 MessageType.MESSAGE_AGREE_ADD_FRIEND_RESULT.getMsgType(),
                 "",
                 JSON.toJSONString(friend),
+                System.currentTimeMillis(),
+                0
+        );
+    }
+
+    public static TransMessageProtobuf.TransMessage.Builder buildInvitationAddGroupMessageBuild(Long fromId, Long toId) {
+        // 收到2001或3001消息，返回给客户端消息发送状态报告
+        return buildAppMessageBuild(UUID.randomUUID().toString(), fromId, toId,
+                MessageType.MESSAGE_INVITATION_ADD_GROUP.getMsgType(),
+                "",
+                "",
                 System.currentTimeMillis(),
                 0
         );
